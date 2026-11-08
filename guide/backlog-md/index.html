@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Backlog.md for Claude Code</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a kanban-card manual. A fixed index on the left, sections stacked on a cool planning-wall ground, with the board itself as the centerpiece. */
+:root {
+  --wall: #e9edf3; --card: #fbfcfe; --sunk: #dde3ec; --ink: #18233a; --soft: #55617a; --rule: #c6cfdd;
+  --accent: #1f5fd0; --accent-ink: #ffffff; --tag: #d6e3fb;
+  --warn: #8a5a00; --warn-bg: #fbeccb; --block: #ad2231; --block-bg: #fbdfe2; --ok: #1a7048; --ok-bg: #d7f0e2;
+  --term: #131a29; --term-ink: #dbe4f3; --term-soft: #8c9ab3;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --wall: #10151f; --card: #1a2130; --sunk: #232c3d; --ink: #e7ecf5; --soft: #a2aec4; --rule: #333e53;
+  --accent: #7daaf7; --accent-ink: #0d1524; --tag: #27375a;
+  --warn: #f1c26b; --warn-bg: #43341a; --block: #ff9aa4; --block-bg: #4b2127; --ok: #7fdcae; --ok-bg: #1b3f2f;
+  --term: #0b0f17; --term-ink: #dbe4f3; --term-soft: #8c9ab3; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --wall: #10151f; --card: #1a2130; --sunk: #232c3d; --ink: #e7ecf5; --soft: #a2aec4; --rule: #333e53;
+  --accent: #7daaf7; --accent-ink: #0d1524; --tag: #27375a;
+  --warn: #f1c26b; --warn-bg: #43341a; --block: #ff9aa4; --block-bg: #4b2127; --ok: #7fdcae; --ok-bg: #1b3f2f;
+  --term: #0b0f17; --term-ink: #dbe4f3; --term-soft: #8c9ab3; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--wall); color: var(--ink); font: 400 16px/1.6 var(--body); }
+.shell { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 96px; display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 56px; }
+nav.index { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 32px); align-self: start; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+nav.index strong { font: 700 15px/1.2 var(--display); margin-bottom: 12px; }
+nav.index a { color: var(--soft); text-decoration: none; padding: 5px 0; }
+nav.index a:hover { color: var(--accent); }
+main { min-width: 0; display: flex; flex-direction: column; gap: 72px; }
+section { display: flex; flex-direction: column; gap: 18px; scroll-margin-top: 24px; min-width: 0; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(38px, 6vw, 62px); line-height: 1.02; font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: 30px; line-height: 1.15; font-weight: 700; }
+h3 { font-size: 18px; line-height: 1.3; font-weight: 500; }
+p { margin: 0; max-width: 66ch; }
+.lede { font-size: 19px; color: var(--soft); max-width: 58ch; }
+.muted { color: var(--soft); }
+code { font: 400 0.9em var(--mono); background: var(--sunk); padding: 1px 5px; border-radius: 3px; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.reqs { display: flex; flex-wrap: wrap; gap: 8px; }
+.reqs span { font: 500 13px var(--mono); background: var(--tag); padding: 4px 9px; border-radius: 3px; }
+
+ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+ol.steps > li { counter-increment: s; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 4px 12px; }
+ol.steps > li::before { content: counter(s); font: 700 22px/1.3 var(--display); color: var(--accent); }
+ol.steps > li > * { grid-column: 2; }
+
+.cmd { display: flex; align-items: flex-start; gap: 10px; background: var(--term); color: var(--term-ink); padding: 11px 14px; border-radius: 5px; font: 400 14px/1.55 var(--mono); }
+.cmd code, pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+.cmd > code { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+button { font: 500 14px var(--body); cursor: pointer; }
+.copy { background: transparent; color: var(--term-soft); border: 1px solid var(--term-soft); border-radius: 3px; padding: 2px 8px; font-size: 12px; flex: none; }
+.copy:hover { color: var(--term-ink); border-color: var(--term-ink); }
+
+.workspace { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+legend { font: 500 14px var(--body); padding: 0; margin-bottom: 8px; }
+.choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 8px; }
+.choice { position: relative; display: block; cursor: pointer; }
+.choice input { position: absolute; opacity: 0; inset: 0; }
+.choice span { display: flex; flex-direction: column; gap: 2px; height: 100%; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 5px; background: var(--wall); }
+.choice b { font-weight: 600; font-size: 14px; }
+.choice small { color: var(--soft); font-size: 12.5px; line-height: 1.35; }
+.choice input:checked + span { border-color: var(--accent); background: var(--tag); box-shadow: inset 0 0 0 1px var(--accent); }
+.choice input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.boardscroll { overflow-x: auto; }
+.board { display: flex; gap: 8px; min-width: min-content; }
+.col { flex: 1 0 118px; background: var(--wall); border-radius: 5px; padding: 8px; display: flex; flex-direction: column; gap: 6px; min-height: 104px; }
+.col header { font: 600 12.5px var(--body); display: flex; flex-direction: column; gap: 3px; }
+.col em { font: 400 11px var(--mono); color: var(--soft); text-transform: uppercase; letter-spacing: 0.05em; font-style: normal; }
+.tcard { background: var(--card); border: 1px solid var(--rule); border-radius: 3px; padding: 6px 7px; font-size: 12px; line-height: 1.3; }
+.tcard i { font: 400 10.5px var(--mono); color: var(--soft); font-style: normal; display: block; }
+
+.gatecols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.gate { border-top: 3px solid var(--rule); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.gate h3 { font-size: 15px; display: flex; justify-content: space-between; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.gate ul { list-style: none; padding: 0; margin: 0; font-size: 13.5px; display: flex; flex-direction: column; gap: 3px; }
+.lvl { font: 500 11px var(--mono); padding: 1px 6px; border-radius: 3px; }
+.lvl.block { background: var(--block-bg); color: var(--block); } .lvl.warn { background: var(--warn-bg); color: var(--warn); } .lvl.off { background: var(--sunk); color: var(--soft); }
+
+.result { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.facts { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 5px 14px; font-size: 14px; align-content: start; }
+.facts dt { color: var(--soft); } .facts dd { margin: 0; min-width: 0; }
+pre.spec, .console { background: var(--term); color: var(--term-ink); padding: 12px 14px; border-radius: 5px; font: 400 13px/1.55 var(--mono); overflow-x: auto; margin: 0; }
+.specwrap { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.specwrap header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--soft); }
+.specwrap .copy { color: var(--soft); border-color: var(--rule); }
+
+.sim { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.ruleslist { display: flex; flex-direction: column; gap: 3px; }
+.ruleslist label { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; padding: 2px 0; cursor: pointer; }
+.ruleslist input { margin-top: 4px; }
+.ruleslist h3 { font-size: 13px; font-weight: 500; color: var(--soft); margin-top: 8px; font-family: var(--body); text-transform: uppercase; letter-spacing: 0.06em; }
+.moves { display: flex; flex-wrap: wrap; gap: 8px; }
+.moves button { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 4px; padding: 8px 14px; }
+.console { min-height: 190px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.console .b { color: #ff9aa4; } .console .w { color: #f1c26b; } .console .g { color: #7fdcae; } .console .p { color: var(--term-soft); }
+
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+.tablewrap { overflow-x: auto; background: var(--card); border: 1px solid var(--rule); border-radius: 6px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 600 13px var(--body); color: var(--soft); } tr:last-child td { border-bottom: 0; }
+td code { white-space: nowrap; }
+.filter { font: 400 15px var(--body); padding: 9px 12px; border: 1px solid var(--rule); border-radius: 5px; background: var(--card); color: var(--ink); width: min(100%, 340px); }
+
+.split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.split > div { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+ul.plain { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; max-width: 66ch; }
+
+.trouble { display: flex; flex-direction: column; gap: 8px; }
+.trouble details { background: var(--card); border: 1px solid var(--rule); border-radius: 5px; padding: 11px 15px; }
+.trouble summary { cursor: pointer; font-weight: 500; }
+.trouble details > div { padding-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+
+@media (max-width: 860px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 24px 64px; }
+  nav.index { position: static; flex-direction: row; flex-wrap: wrap; gap: 4px 14px; }
+  nav.index strong { width: 100%; margin-bottom: 2px; }
+  .result, .sim, .split, .gatecols { grid-template-columns: minmax(0, 1fr); }
+  .workspace { padding: 16px; }
+  main { gap: 56px; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="index" aria-label="Sections">
+    <strong>backlog-md</strong>
+    <a href="#install">Install</a>
+    <a href="#design">Plan your board</a>
+    <a href="#gates">Required fields</a>
+    <a href="#daily">Daily commands</a>
+    <a href="#auto">What runs by itself</a>
+    <a href="#terminal">Your terminal</a>
+    <a href="#team">Working in a team</a>
+    <a href="#limits">Limits</a>
+    <a href="#help">Troubleshooting</a>
+  </nav>
+
+  <main>
+    <section>
+      <h1>Backlog.md for Claude Code</h1>
+      <p class="lede">A kanban board that lives in your repository and that Claude keeps up to date. You choose where it's stored, which columns it has and which fields a task must have. The plugin holds Claude to those choices.</p>
+      <div class="reqs"><span>Claude Code</span><span>Git</span><span>Node.js 18+</span><span>Backlog.md 1.55.3+</span><span>macOS or Linux</span></div>
+    </section>
+
+    <section id="install">
+      <h2>Install</h2>
+      <ol class="steps">
+        <li><h3>Install the Backlog.md command</h3><div class="cmd"><code>npm i -g backlog.md</code><button class="copy" type="button">Copy</button></div></li>
+        <li><h3>Add the plugin in Claude Code</h3>
+          <div class="cmd"><code>/plugin marketplace add maxlk/claude-marketplace</code><button class="copy" type="button">Copy</button></div>
+          <div class="cmd"><code>/plugin install backlog-md@maxlk</code><button class="copy" type="button">Copy</button></div></li>
+        <li><h3>Start Claude Code in a project</h3><p>Claude offers to set up a board the first time. Choose <b>Not now</b> to be asked again in 14 days, or <b>Never in this project</b>. You can run <code>/backlog-md:setup</code> at any time.</p></li>
+      </ol>
+    </section>
+
+    <section id="design">
+      <h2>Plan your board</h2>
+      <p>Setup asks these three questions. Try the answers here to see the board and rules you'd get. Nothing on this page changes your project.</p>
+      <div class="workspace">
+        <fieldset id="storage"><legend>Where should the backlog live?</legend><div class="choices"></div></fieldset>
+        <fieldset id="columns"><legend>Which kanban columns?</legend><div class="choices"></div></fieldset>
+        <div class="boardscroll"><div class="board" id="board"></div></div>
+        <fieldset id="fields"><legend>Which fields are mandatory?</legend><div class="choices"></div></fieldset>
+        <div class="gatecols" id="gatecols"></div>
+        <div class="result">
+          <dl class="facts" id="facts"></dl>
+          <div class="specwrap"><header><span>Same choices, as a setup command</span><button class="copy" type="button" id="copyspec">Copy</button></header><pre class="spec"><code id="spec"></code></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="gates">
+      <h2>How required fields work</h2>
+      <p>Rules apply at three moments: when a task is <b>created</b>, when work <b>starts</b> on it, and when it's <b>finished</b>. Each moment rechecks the earlier ones. <span class="lvl warn">warn</span> lets the change through and tells Claude what's missing. <span class="lvl block">block</span> writes nothing until it's fixed.</p>
+      <div class="workspace">
+        <fieldset id="simfields"><legend>Rules to try</legend><div class="choices"></div></fieldset>
+        <div class="sim">
+          <div><p class="muted" style="margin-bottom:6px">Tick what the task already has:</p><div class="ruleslist" id="rules"></div></div>
+          <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+            <div class="moves" id="moves"></div>
+            <div class="console" id="console" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+      <p class="muted">Drafts are exempt until they're promoted. Older tasks aren't checked until they move forward, so turning on rules for an existing board doesn't disrupt it. A milestone must already exist, because Backlog.md would otherwise accept a mistyped name without complaint.</p>
+    </section>
+
+    <section id="daily">
+      <h2>Daily commands</h2>
+      <input class="filter" id="cmdfilter" type="search" placeholder="Filter commands" aria-label="Filter commands">
+      <div class="tablewrap"><table><thead><tr><th>Type this</th><th>What happens</th></tr></thead><tbody id="cmdrows"></tbody></table></div>
+      <p>You can also just ask: "what should I work on?" or "put this plan on the board" works without typing a command.</p>
+    </section>
+
+    <section id="auto">
+      <h2>What runs by itself</h2>
+      <div class="tablewrap"><table><thead><tr><th>When</th><th>What the plugin does</th></tr></thead><tbody>
+        <tr><td>A session starts</td><td>Points Claude's <code>backlog</code> command at this project's board, restores the board if its checkout went missing, gets the latest version, and gives Claude a short summary of the board and rules.</td></tr>
+        <tr><td>Claude runs <code>backlog</code></td><td>Checks your required fields before anything is written. Retries if another agent is editing the same task. Simple board commands run without a permission prompt.</td></tr>
+        <tr><td>Claude tries to edit a task file</td><td>Refuses and tells it to use the CLI, so the file format stays valid. Changes to board configuration ask you first.</td></tr>
+        <tr><td>Claude finishes a turn</td><td>Stops Claude if a task it finished is missing required fields. Saves the board at most every 10 minutes. If code changed and no task was touched, reminds it once on your next message.</td></tr>
+        <tr><td>The session ends</td><td>Saves the board and, if sync is on, pushes it.</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section id="terminal">
+      <h2>Using the board from your own terminal</h2>
+      <p>The automatic routing only exists inside Claude. If your board isn't in your code tree, ask Claude to run this and add the printed line to your shell profile:</p>
+      <div class="cmd"><code>backlog-md shell-init</code><button class="copy" type="button">Copy</button></div>
+      <p>It gives you a <code>blg</code> command. For a dedicated-ref board, it looks like this:</p>
+      <div class="cmd"><code>blg() { BACKLOG_CWD="$(git rev-parse --path-format=absolute --git-common-dir)/backlog-wt" backlog "$@"; }</code><button class="copy" type="button">Copy</button></div>
+      <p>Then use <code>blg board</code> or <code>blg browser</code>. To have Claude start the web board instead, run <code>/backlog-md:status --web</code>.</p>
+    </section>
+
+    <section id="team">
+      <h2>Working in a team</h2>
+      <div class="split">
+        <div><h3>A teammate joins</h3><p>When someone with the plugin opens a clone of the repository, Claude offers to attach the shared board. They don't choose presets, because the rules travel with the board.</p></div>
+        <div><h3>Sync</h3><p>Setup asks before turning on sync, and names the remote. The board branch is as visible as the repository. It never force-pushes.</p></div>
+        <div><h3>Two people change the board</h3><p>Changes to different tasks merge automatically. If the same task changed on both sides, sync pauses and your board stays as it is. Run <code>/backlog-md:sync</code> and Claude walks you through choosing a version.</p></div>
+        <div><h3>Task numbers collide</h3><p>Two people can create the same task number while offline, which stops the board listing tasks. The plugin tells you, and <code>/backlog-md:doctor</code> renumbers them with your agreement.</p></div>
+      </div>
+    </section>
+
+    <section id="limits">
+      <h2>Limits you should know</h2>
+      <ul class="plain">
+        <li><b>Rules bind Claude, not people.</b> Your terminal and the web board aren't gated. <code>/backlog-md:doctor --audit</code> lists tasks that slipped through.</li>
+        <li><b>Board commits skip your git hooks and commit signing</b>, so they can't hang in the background. That includes any secret scanner in your hooks. If you need those on the board, choose a storage option you commit yourself.</li>
+        <li><b>Human approval is a guardrail, not a security boundary.</b> The Agent-driven preset uses Claude Code's permission prompt, which permissive modes skip.</li>
+        <li><b>Status-change scripts are refused until you trust them.</b> A Backlog.md board can run shell commands when a task moves, and a pulled board could contain one.</li>
+        <li><b>Moving a board between storage options is manual.</b> The README lists the steps.</li>
+        <li><b>Claude Code only.</b> The plugin relies on features that claude.ai and Cowork don't load.</li>
+      </ul>
+    </section>
+
+    <section id="help">
+      <h2>Troubleshooting</h2>
+      <p>Start with <code>/backlog-md:doctor</code>, which checks all of this and suggests fixes.</p>
+      <div class="trouble" id="trouble"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const PRESETS = {"columns": {"minimal": {"label": "Minimal", "description": "To Do → In Progress → Done. Backlog.md's own default; suits small solo projects.", "statuses": ["To Do", "In Progress", "Done"], "classes": {"queued": ["To Do"], "active": ["In Progress"], "terminal": ["Done"]}}, "standard": {"label": "Standard", "description": "Separates raw ideas (Backlog) from committed work (To Do).", "statuses": ["Backlog", "To Do", "In Progress", "Done"], "classes": {"queued": ["Backlog", "To Do"], "active": ["In Progress"], "terminal": ["Done"]}}, "review-gated": {"label": "Review-gated", "description": "Adds an In Review column for pull-request based teams.", "statuses": ["Backlog", "To Do", "In Progress", "In Review", "Done"], "classes": {"queued": ["Backlog", "To Do"], "active": ["In Progress", "In Review"], "terminal": ["Done"]}}, "agent-driven": {"label": "Agent-driven", "description": "Claude works the queue; a person approves every move to Done.", "statuses": ["Backlog", "Ready for Agent", "Agent Working", "Human Review", "Done"], "classes": {"queued": ["Backlog", "Ready for Agent"], "active": ["Agent Working", "Human Review"], "terminal": ["Done"]}, "transitions": [{"to": "class:terminal", "approval": "human"}]}, "release-qa": {"label": "Release / QA", "description": "Full pipeline through review, QA and release readiness.", "statuses": ["Backlog", "To Do", "In Progress", "In Review", "QA", "Ready to Release", "Done"], "classes": {"queued": ["Backlog", "To Do"], "active": ["In Progress", "In Review", "QA", "Ready to Release"], "terminal": ["Done"]}}, "research": {"label": "Research", "description": "Discovery work: questions become findings.", "statuses": ["Questions", "Investigating", "Synthesizing", "Peer Review", "Done"], "classes": {"queued": ["Questions"], "active": ["Investigating", "Synthesizing", "Peer Review"], "terminal": ["Done"]}, "labels": ["question", "experiment", "finding", "decision"]}}, "fields": {"none": {"label": "None", "description": "No required fields. Only Backlog.md's own title requirement applies.", "enforcement": "off", "strictMilestones": false, "gates": {}, "dod": [], "labels": []}, "light": {"label": "Light", "description": "A description to start, acceptance criteria checked to finish. Warnings only.", "enforcement": "warn", "strictMilestones": true, "gates": {"create": [{"field": "description", "op": "present"}], "finish": [{"field": "acceptanceCriteria", "op": "allChecked"}]}, "dod": [], "labels": ["bug", "feature", "chore", "docs"]}, "agent-ready": {"label": "Agent-ready", "description": "Tasks an agent can execute and verify: description and criteria, a plan to start, evidence to finish.", "enforcement": {"create": "warn", "start": "warn", "finish": "block"}, "strictMilestones": true, "gates": {"create": [{"field": "description", "op": "present"}, {"field": "acceptanceCriteria", "op": "minCount", "value": 1}], "start": [{"field": "implementationPlan", "op": "present"}, {"field": "assignees", "op": "present"}], "finish": [{"field": "acceptanceCriteria", "op": "allChecked"}, {"field": "definitionOfDone", "op": "allChecked"}, {"field": "finalSummary", "op": "present"}]}, "dod": ["Tests pass", "Lint and type checks pass", "No unrelated changes"], "labels": ["bug", "feature", "chore", "docs"]}, "milestone-driven": {"label": "Milestone-driven", "description": "Every task belongs to an existing milestone from the moment it is created.", "enforcement": {"create": "block", "start": "warn", "finish": "block"}, "strictMilestones": true, "requiresMilestone": true, "gates": {"create": [{"field": "description", "op": "present", "level": "warn"}, {"field": "milestone", "op": "in", "source": "milestones"}], "start": [{"field": "assignees", "op": "present"}, {"field": "acceptanceCriteria", "op": "minCount", "value": 1}], "finish": [{"field": "acceptanceCriteria", "op": "allChecked"}, {"field": "finalSummary", "op": "present"}]}, "dod": ["Tests pass", "Lint and type checks pass", "No unrelated changes"], "labels": ["bug", "feature", "chore", "docs"]}, "team": {"label": "Team", "description": "Triaged and owned: priority, type, labels and criteria at creation; milestone and plan to start.", "enforcement": {"create": "warn", "start": "warn", "finish": "block"}, "strictMilestones": true, "requiresMilestone": true, "gates": {"create": [{"field": "description", "op": "present"}, {"field": "acceptanceCriteria", "op": "minCount", "value": 2}, {"field": "priority", "op": "present"}, {"field": "type", "op": "present"}, {"field": "labels", "op": "subsetOf", "source": "config.labels"}], "start": [{"field": "assignees", "op": "present"}, {"field": "milestone", "op": "in", "source": "milestones"}, {"field": "implementationPlan", "op": "present"}], "finish": [{"field": "acceptanceCriteria", "op": "allChecked"}, {"field": "definitionOfDone", "op": "allChecked"}, {"field": "finalSummary", "op": "present"}]}, "dod": ["Tests pass", "Lint and type checks pass", "No unrelated changes", "Peer reviewed", "Docs updated"], "labels": ["bug", "feature", "chore", "docs"]}, "strict": {"label": "Strict / Audit", "description": "Everything is required and blocked: full traceability for regulated or high-risk work.", "enforcement": "block", "strictMilestones": true, "requiresMilestone": true, "gates": {"create": [{"field": "description", "op": "present"}, {"field": "acceptanceCriteria", "op": "minCount", "value": 2}, {"field": "priority", "op": "present"}, {"field": "type", "op": "present"}, {"field": "labels", "op": "subsetOf", "source": "config.labels"}, {"field": "milestone", "op": "in", "source": "milestones"}], "start": [{"field": "assignees", "op": "present"}, {"field": "implementationPlan", "op": "present"}], "finish": [{"field": "acceptanceCriteria", "op": "allChecked"}, {"field": "definitionOfDone", "op": "allChecked"}, {"field": "finalSummary", "op": "present"}, {"field": "implementationNotes", "op": "present"}, {"field": "references", "op": "minCount", "value": 1}, {"field": "modifiedFiles", "op": "minCount", "value": 1, "whenNot": {"type": ["docs", "spike"]}}]}, "dod": ["Tests pass", "Lint and type checks pass", "No unrelated changes", "Peer reviewed", "Docs updated", "Risk and rollback noted"], "labels": ["bug", "feature", "chore", "docs", "security", "compliance"]}}};
+
+const STORAGE = {
+  ref: { label: 'Dedicated git ref', note: 'Recommended. Own branch, code stays clean.', where: 'Branch backlog, at .git/backlog-wt', committed: 'Automatically, by the plugin', shared: 'Yes, by pushing the branch', spec: { mode: 'ref' }, sync: 'auto' },
+  folder: { label: 'New separate folder', note: 'Its own folder and git history.', where: '~/.local/share/backlog-md/boards/<project>', committed: 'Automatically, by the plugin', shared: 'Only if you add a remote', spec: { mode: 'folder' } },
+  existing: { label: 'Existing board', note: 'Use a board you already have.', where: 'The folder you choose', committed: 'By you', shared: 'However that board is shared', spec: { mode: 'existing', path: '/path/to/board' }, existing: true },
+  'in-tree': { label: 'In the code tree', note: 'More options: tasks travel with branches.', where: 'backlog/ on your code branches', committed: 'By you, with your code', shared: 'Yes, with your code', spec: { mode: 'in-tree' } },
+  local: { label: 'Private to this clone', note: 'More options: never shared or versioned.', where: '.git/backlog-local', committed: 'Not versioned', shared: 'No', spec: { mode: 'local' } },
+};
+const FIELD_NAMES = { description: 'description', acceptanceCriteria: 'acceptance criteria', definitionOfDone: 'Definition of Done', assignees: 'assignee', labels: 'labels', priority: 'priority', type: 'type', milestone: 'milestone', references: 'reference', modifiedFiles: 'modified file', implementationPlan: 'implementation plan', implementationNotes: 'implementation notes', finalSummary: 'final summary' };
+const STAGES = [['create', 'Create', 'Create task'], ['start', 'Start', 'Start work'], ['finish', 'Finish', 'Mark done']];
+const COMMANDS = [
+  ['/backlog-md:setup', 'Set up the board, or change its columns, rules and settings.'],
+  ['/backlog-md:status', 'Show the board. Add --web to open the web board.'],
+  ['/backlog-md:next', 'Recommend what to work on next, with reasons.'],
+  ['/backlog-md:start TASK-12', 'Claim a task, write its plan and move it to an active column.'],
+  ['/backlog-md:finish TASK-12', 'Verify the criteria, write the summary and move the task to Done.'],
+  ['/backlog-md:plan-to-tasks <spec>', 'Break a plan or feature into tasks. Shows you the breakdown first.'],
+  ['/backlog-md:sync', 'Save and sync the board now, or resolve a paused sync.'],
+  ['/backlog-md:doctor', 'Check the whole setup. Add --audit to list tasks outside the rules.'],
+];
+const TROUBLE = [
+  ['Claude says the board can’t be found', 'Start a new session: the routing is set when a session starts. If it persists, run <code>/backlog-md:doctor</code>. The plugin rebuilds a missing board checkout from the branch.'],
+  ['Backlog.md isn’t installed, or is too old', 'Run <code>npm i -g backlog.md</code>. The plugin needs version 1.55.3 or newer.'],
+  ['A task won’t move to Done', 'The output lists what’s missing, marked <code>BLOCK</code>. Nothing was written. On the Agent-driven preset, someone has to approve the move too.'],
+  ['"Unknown milestone"', 'Create it first with <code>backlog milestone add "V1"</code>, or use one that exists. This catches mistyped milestone names.'],
+  ['"onStatusChange" refused a status change', 'Your board wants to run a shell command when a task moves. Read the command. If you accept it, have Claude run <code>backlog-md trust-callbacks</code> and confirm the prompt.'],
+  ['Claude reports sync is blocked', 'Run <code>/backlog-md:sync</code>. Your board is untouched and keeps saving locally. A rejected push usually means a branch ruleset needs an exclusion for the board branch.'],
+  ['Tasks stopped listing, or the board looks empty', 'Duplicate task numbers can cause this after a merge. Run <code>/backlog-md:doctor</code> and agree to the repair.'],
+  ['I moved the repository and the board broke', 'Run <code>git worktree repair .git/backlog-wt</code> from the repository, then restart the session.'],
+  ['I want to start over', 'Delete <code>.git/backlog-md/</code>, which holds only the plugin’s settings for this clone. The board itself is left alone. Then run <code>/backlog-md:setup</code>.'],
+];
+
+function el(tag, attrs = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') n.className = v; else if (k === 'text') n.textContent = v; else if (k === 'html') n.innerHTML = v; else n.setAttribute(k, v);
+  }
+  n.append(...kids);
+  return n;
+}
+function radioGroup(id, items, value, onChange) {
+  const box = document.querySelector(`#${id} .choices`);
+  for (const [key, label, note] of items) {
+    const input = el('input', { type: 'radio', name: id, value: key, id: `${id}-${key}` });
+    input.checked = key === value;
+    input.addEventListener('change', () => onChange(key));
+    box.append(el('label', { class: 'choice', for: input.id }, input, el('span', {}, el('b', { text: label }), el('small', { text: note }))));
+  }
+}
+function copyText(text, button) {
+  const done = (msg) => { const old = button.textContent; button.textContent = msg; setTimeout(() => { button.textContent = old; }, 1200); };
+  try {
+    navigator.clipboard.writeText(text).then(() => done('Copied'), () => done('Select to copy'));
+  } catch { done('Select to copy'); }
+}
+function levelOf(preset, stage, rule) {
+  if (rule.level) return rule.level;
+  return typeof preset.enforcement === 'string' ? preset.enforcement : (preset.enforcement[stage] ?? 'off');
+}
+function describeRule(rule) {
+  const name = FIELD_NAMES[rule.field] ?? rule.field;
+  if (rule.op === 'minCount') return rule.value > 1 ? `at least ${rule.value} ${name}` : `at least one ${name}`;
+  if (rule.op === 'allChecked') return `${name}: all checked`;
+  if (rule.op === 'in') return `${name}, existing`;
+  if (rule.op === 'subsetOf') return `${name} from the allowed list`;
+  return name;
+}
+
+const state = { storage: 'ref', columns: 'standard', fields: 'agent-ready', sim: 'agent-ready', have: new Set() };
+const SAMPLE = ['Add login rate limit', 'Fix session expiry', 'Export board as CSV'];
+
+function renderBoard() {
+  const c = PRESETS.columns[state.columns];
+  const classOf = (s) => Object.keys(c.classes).find((k) => c.classes[k].includes(s));
+  const board = document.getElementById('board');
+  board.replaceChildren(...c.statuses.map((s, i) => {
+    const col = el('div', { class: 'col' }, el('header', {}, document.createTextNode(s), el('em', { text: classOf(s) })));
+    if (SAMPLE[i]) col.append(el('div', { class: 'tcard' }, el('i', { text: `TASK-${i + 1}` }), document.createTextNode(SAMPLE[i])));
+    return col;
+  }));
+}
+function renderGates() {
+  const f = PRESETS.fields[state.fields];
+  document.getElementById('gatecols').replaceChildren(...STAGES.map(([stage, title]) => {
+    const rules = f.gates[stage] ?? [];
+    const level = rules.length ? [...new Set(rules.map((r) => levelOf(f, stage, r)))].join('/') : 'off';
+    const list = el('ul');
+    if (rules.length === 0) list.append(el('li', { class: 'muted', text: 'Nothing required' }));
+    for (const r of rules) list.append(el('li', { text: describeRule(r) }));
+    return el('div', { class: 'gate' }, el('h3', {}, document.createTextNode(title), el('span', { class: `lvl ${level.split('/').pop()}`, text: level })), list);
+  }));
+}
+function renderFacts() {
+  const s = STORAGE[state.storage], c = PRESETS.columns[state.columns], f = PRESETS.fields[state.fields];
+  const rows = [['Stored', s.where], ['Saved', s.committed], ['Shared', s.shared], ['Columns', s.existing ? 'Your board keeps its own columns' : c.label], ['Done checklist', f.dod.length ? f.dod.join('; ') : 'None']];
+  if (f.requiresMilestone) rows.push(['Also asks', 'A first milestone']);
+  if (c.transitions) rows.push(['Done needs', 'A person’s approval']);
+  document.getElementById('facts').replaceChildren(...rows.flatMap(([k, v]) => [el('dt', { text: k }), el('dd', { text: v })]));
+  const spec = { ...s.spec };
+  if (!s.existing) spec.columns = state.columns;
+  spec.fields = state.fields;
+  if (f.requiresMilestone) spec.milestones = ['V1'];
+  if (s.sync) spec.sync = s.sync;
+  document.getElementById('spec').textContent = `backlog-md setup --spec '${JSON.stringify(spec)}'`;
+}
+function renderConfig() { renderBoard(); renderGates(); renderFacts(); }
+
+function allRules(preset) {
+  return STAGES.flatMap(([stage]) => (preset.gates[stage] ?? []).map((rule, i) => ({ stage, rule, key: `${stage}:${i}`, level: levelOf(preset, stage, rule) })));
+}
+function renderSim() {
+  const f = PRESETS.fields[state.sim];
+  const items = allRules(f);
+  const box = document.getElementById('rules');
+  box.replaceChildren();
+  for (const [stage, title] of STAGES) {
+    const rs = items.filter((x) => x.stage === stage && x.level !== 'off');
+    if (!rs.length) continue;
+    box.append(el('h3', { text: title }));
+    for (const r of rs) {
+      const input = el('input', { type: 'checkbox', id: `have-${r.key}` });
+      input.checked = state.have.has(r.key);
+      input.addEventListener('change', () => { input.checked ? state.have.add(r.key) : state.have.delete(r.key); });
+      box.append(el('label', { for: input.id }, input, document.createTextNode(describeRule(r.rule))));
+    }
+  }
+  if (!items.length) box.append(el('p', { class: 'muted', text: 'This preset requires nothing, so every move goes through.' }));
+}
+function line(cls, text) { return el('span', { class: cls, text: `${text}\n` }); }
+function simulate(stageIndex) {
+  const f = PRESETS.fields[state.sim];
+  const stages = STAGES.slice(0, stageIndex + 1).map((s) => s[0]);
+  const missing = allRules(f).filter((r) => stages.includes(r.stage) && r.level !== 'off' && !state.have.has(r.key));
+  const cmd = ['$ backlog task create "Add login rate limit"', '$ backlog task edit 1 -s "In Progress"', '$ backlog task edit 1 -s Done'][stageIndex];
+  const out = [line('p', cmd)];
+  const blocked = missing.some((m) => m.level === 'block');
+  if (missing.length) out.push(line('', '[backlog-md] Task does not meet this project’s required fields:'));
+  for (const m of missing) out.push(line(m.level === 'block' ? 'b' : 'w', `  ${m.level === 'block' ? 'BLOCK' : 'warn '} [${m.stage}] ${describeRule(m.rule)}`));
+  if (blocked) out.push(line('b', 'NOT applied. Nothing was written.'));
+  else out.push(line('g', missing.length ? 'Done, with warnings for Claude to follow up.' : 'Done.'));
+  document.getElementById('console').replaceChildren(...out);
+}
+
+radioGroup('storage', Object.entries(STORAGE).map(([k, v]) => [k, v.label, v.note]), state.storage, (v) => { state.storage = v; document.getElementById('columns').disabled = STORAGE[v].existing === true; renderConfig(); });
+radioGroup('columns', Object.entries(PRESETS.columns).map(([k, v]) => [k, v.label, v.statuses.join(' → ')]), state.columns, (v) => { state.columns = v; renderConfig(); });
+radioGroup('fields', Object.entries(PRESETS.fields).map(([k, v]) => [k, v.label, v.description]), state.fields, (v) => { state.fields = v; renderConfig(); });
+radioGroup('simfields', Object.entries(PRESETS.fields).filter(([k]) => k !== 'none').map(([k, v]) => [k, v.label, v.description]), state.sim, (v) => { state.sim = v; state.have = new Set(); renderSim(); document.getElementById('console').replaceChildren(line('p', 'Choose an action above.')); });
+
+document.getElementById('moves').append(...STAGES.map(([, , label], i) => { const b = el('button', { type: 'button', text: label }); b.addEventListener('click', () => simulate(i)); return b; }));
+const cmdRows = document.getElementById('cmdrows');
+function renderCommands(q = '') {
+  const needle = q.trim().toLowerCase();
+  cmdRows.replaceChildren(...COMMANDS.filter(([c, d]) => `${c} ${d}`.toLowerCase().includes(needle)).map(([c, d]) => el('tr', {}, el('td', {}, el('code', { text: c })), el('td', { text: d }))));
+}
+document.getElementById('cmdfilter').addEventListener('input', (e) => renderCommands(e.target.value));
+document.getElementById('trouble').append(...TROUBLE.map(([q, a]) => el('details', {}, el('summary', { text: q }), el('div', {}, el('p', { html: a })))));
+document.querySelectorAll('.cmd .copy').forEach((b) => b.addEventListener('click', () => copyText(b.previousElementSibling.textContent, b)));
+document.getElementById('copyspec').addEventListener('click', (e) => copyText(document.getElementById('spec').textContent, e.target));
+
+renderConfig();
+renderSim();
+renderCommands();
+simulate(2);
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+#!/bin/sh
+# Claude-side wrapper around the real Backlog.md CLI. See lib/shim.mjs.
+bin_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+if command -v node >/dev/null 2>&1; then
+  exec node "$bin_dir/../lib/shim.mjs" "$@"
+fi
+
+# Without Node the gates cannot run, but the board must stay reachable.
+new_path=
+old_ifs=$IFS; IFS=:
+for entry in $PATH; do
+  [ "$entry" = "$bin_dir" ] || new_path="${new_path:+$new_path:}$entry"
+done
+IFS=$old_ifs
+PATH=$new_path; export PATH
+common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+if [ -n "$common" ] && [ -d "$common/backlog-wt" ]; then
+  BACKLOG_CWD="$common/backlog-wt"; export BACKLOG_CWD
+fi
+echo "[backlog-md] node not found: required-field gates are off." >&2
+exec backlog "$@"

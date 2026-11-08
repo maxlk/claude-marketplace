@@ -1,0 +1,128 @@
+{
+  "none": {
+    "label": "None",
+    "description": "No required fields. Only Backlog.md's own title requirement applies.",
+    "enforcement": "off",
+    "strictMilestones": false,
+    "gates": {},
+    "dod": [],
+    "labels": []
+  },
+  "light": {
+    "label": "Light",
+    "description": "A description to start, acceptance criteria checked to finish. Warnings only.",
+    "enforcement": "warn",
+    "strictMilestones": true,
+    "gates": {
+      "create": [{ "field": "description", "op": "present" }],
+      "finish": [{ "field": "acceptanceCriteria", "op": "allChecked" }]
+    },
+    "dod": [],
+    "labels": ["bug", "feature", "chore", "docs"]
+  },
+  "agent-ready": {
+    "label": "Agent-ready",
+    "description": "Tasks an agent can execute and verify: description and criteria, a plan to start, evidence to finish.",
+    "enforcement": { "create": "warn", "start": "warn", "finish": "block" },
+    "strictMilestones": true,
+    "gates": {
+      "create": [
+        { "field": "description", "op": "present" },
+        { "field": "acceptanceCriteria", "op": "minCount", "value": 1 }
+      ],
+      "start": [
+        { "field": "implementationPlan", "op": "present" },
+        { "field": "assignees", "op": "present" }
+      ],
+      "finish": [
+        { "field": "acceptanceCriteria", "op": "allChecked" },
+        { "field": "definitionOfDone", "op": "allChecked" },
+        { "field": "finalSummary", "op": "present" }
+      ]
+    },
+    "dod": ["Tests pass", "Lint and type checks pass", "No unrelated changes"],
+    "labels": ["bug", "feature", "chore", "docs"]
+  },
+  "milestone-driven": {
+    "label": "Milestone-driven",
+    "description": "Every task belongs to an existing milestone from the moment it is created.",
+    "enforcement": { "create": "block", "start": "warn", "finish": "block" },
+    "strictMilestones": true,
+    "requiresMilestone": true,
+    "gates": {
+      "create": [
+        { "field": "description", "op": "present", "level": "warn" },
+        { "field": "milestone", "op": "in", "source": "milestones" }
+      ],
+      "start": [
+        { "field": "assignees", "op": "present" },
+        { "field": "acceptanceCriteria", "op": "minCount", "value": 1 }
+      ],
+      "finish": [
+        { "field": "acceptanceCriteria", "op": "allChecked" },
+        { "field": "finalSummary", "op": "present" }
+      ]
+    },
+    "dod": ["Tests pass", "Lint and type checks pass", "No unrelated changes"],
+    "labels": ["bug", "feature", "chore", "docs"]
+  },
+  "team": {
+    "label": "Team",
+    "description": "Triaged and owned: priority, type, labels and criteria at creation; milestone and plan to start.",
+    "enforcement": { "create": "warn", "start": "warn", "finish": "block" },
+    "strictMilestones": true,
+    "requiresMilestone": true,
+    "gates": {
+      "create": [
+        { "field": "description", "op": "present" },
+        { "field": "acceptanceCriteria", "op": "minCount", "value": 2 },
+        { "field": "priority", "op": "present" },
+        { "field": "type", "op": "present" },
+        { "field": "labels", "op": "subsetOf", "source": "config.labels" }
+      ],
+      "start": [
+        { "field": "assignees", "op": "present" },
+        { "field": "milestone", "op": "in", "source": "milestones" },
+        { "field": "implementationPlan", "op": "present" }
+      ],
+      "finish": [
+        { "field": "acceptanceCriteria", "op": "allChecked" },
+        { "field": "definitionOfDone", "op": "allChecked" },
+        { "field": "finalSummary", "op": "present" }
+      ]
+    },
+    "dod": ["Tests pass", "Lint and type checks pass", "No unrelated changes", "Peer reviewed", "Docs updated"],
+    "labels": ["bug", "feature", "chore", "docs"]
+  },
+  "strict": {
+    "label": "Strict / Audit",
+    "description": "Everything is required and blocked: full traceability for regulated or high-risk work.",
+    "enforcement": "block",
+    "strictMilestones": true,
+    "requiresMilestone": true,
+    "gates": {
+      "create": [
+        { "field": "description", "op": "present" },
+        { "field": "acceptanceCriteria", "op": "minCount", "value": 2 },
+        { "field": "priority", "op": "present" },
+        { "field": "type", "op": "present" },
+        { "field": "labels", "op": "subsetOf", "source": "config.labels" },
+        { "field": "milestone", "op": "in", "source": "milestones" }
+      ],
+      "start": [
+        { "field": "assignees", "op": "present" },
+        { "field": "implementationPlan", "op": "present" }
+      ],
+      "finish": [
+        { "field": "acceptanceCriteria", "op": "allChecked" },
+        { "field": "definitionOfDone", "op": "allChecked" },
+        { "field": "finalSummary", "op": "present" },
+        { "field": "implementationNotes", "op": "present" },
+        { "field": "references", "op": "minCount", "value": 1 },
+        { "field": "modifiedFiles", "op": "minCount", "value": 1, "whenNot": { "type": ["docs", "spike"] } }
+      ]
+    },
+    "dod": ["Tests pass", "Lint and type checks pass", "No unrelated changes", "Peer reviewed", "Docs updated", "Risk and rollback noted"],
+    "labels": ["bug", "feature", "chore", "docs", "security", "compliance"]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "backlog-md",
+  "displayName": "Backlog.md for Claude Code",
+  "version": "0.1.0",
+  "description": "Track work on a Backlog.md kanban board: guided per-project setup, dedicated-ref storage, required-field gates, board routing and sync. Unofficial.",
+  "author": { "name": "maxlk", "url": "https://github.com/maxlk" },
+  "homepage": "https://github.com/maxlk/claude-marketplace/tree/main/plugins/backlog-md",
+  "repository": "https://github.com/maxlk/claude-marketplace",
+  "license": "MIT",
+  "keywords": ["backlog", "backlog.md", "kanban", "tasks", "project-management"],
+  "userConfig": {
+    "offerSetup": {
+      "type": "string",
+      "title": "Offer setup in new projects",
+      "description": "auto: offer board setup when a project has none. manual: only when you run /backlog-md:setup.",
+      "default": "auto",
+      "options": ["auto", "manual"]
+    }
+  }
+}

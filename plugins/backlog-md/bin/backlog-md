@@ -1,0 +1,8 @@
+#!/bin/sh
+# Plugin administration commands. See lib/admin.mjs.
+bin_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+if ! command -v node >/dev/null 2>&1; then
+  echo "[backlog-md] Node.js 18+ is required for this command." >&2
+  exit 127
+fi
+exec node "$bin_dir/../lib/admin.mjs" "$@"

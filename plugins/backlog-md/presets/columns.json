@@ -1,0 +1,40 @@
+{
+  "minimal": {
+    "label": "Minimal",
+    "description": "To Do → In Progress → Done. Backlog.md's own default; suits small solo projects.",
+    "statuses": ["To Do", "In Progress", "Done"],
+    "classes": { "queued": ["To Do"], "active": ["In Progress"], "terminal": ["Done"] }
+  },
+  "standard": {
+    "label": "Standard",
+    "description": "Separates raw ideas (Backlog) from committed work (To Do).",
+    "statuses": ["Backlog", "To Do", "In Progress", "Done"],
+    "classes": { "queued": ["Backlog", "To Do"], "active": ["In Progress"], "terminal": ["Done"] }
+  },
+  "review-gated": {
+    "label": "Review-gated",
+    "description": "Adds an In Review column for pull-request based teams.",
+    "statuses": ["Backlog", "To Do", "In Progress", "In Review", "Done"],
+    "classes": { "queued": ["Backlog", "To Do"], "active": ["In Progress", "In Review"], "terminal": ["Done"] }
+  },
+  "agent-driven": {
+    "label": "Agent-driven",
+    "description": "Claude works the queue; a person approves every move to Done.",
+    "statuses": ["Backlog", "Ready for Agent", "Agent Working", "Human Review", "Done"],
+    "classes": { "queued": ["Backlog", "Ready for Agent"], "active": ["Agent Working", "Human Review"], "terminal": ["Done"] },
+    "transitions": [{ "to": "class:terminal", "approval": "human" }]
+  },
+  "release-qa": {
+    "label": "Release / QA",
+    "description": "Full pipeline through review, QA and release readiness.",
+    "statuses": ["Backlog", "To Do", "In Progress", "In Review", "QA", "Ready to Release", "Done"],
+    "classes": { "queued": ["Backlog", "To Do"], "active": ["In Progress", "In Review", "QA", "Ready to Release"], "terminal": ["Done"] }
+  },
+  "research": {
+    "label": "Research",
+    "description": "Discovery work: questions become findings.",
+    "statuses": ["Questions", "Investigating", "Synthesizing", "Peer Review", "Done"],
+    "classes": { "queued": ["Questions"], "active": ["Investigating", "Synthesizing", "Peer Review"], "terminal": ["Done"] },
+    "labels": ["question", "experiment", "finding", "decision"]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "maxlk",
+  "owner": { "name": "maxlk", "url": "https://github.com/maxlk" },
+  "description": "Claude Code plugins by maxlk.",
+  "plugins": [
+    {
+      "name": "backlog-md",
+      "source": "./plugins/backlog-md",
+      "description": "Track work on a Backlog.md kanban board: guided per-project setup, dedicated-ref storage, required-field gates and board sync.",
+      "category": "productivity",
+      "tags": ["backlog", "kanban", "tasks", "project-management"]
+    }
+  ]
+}

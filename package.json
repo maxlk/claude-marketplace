@@ -1,0 +1,10 @@
+{
+  "name": "maxlk-claude-marketplace",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Development scripts for this marketplace. The plugins themselves have no dependencies.",
+  "scripts": {
+    "test": "node --test --test-concurrency=4 tests/*/*.test.mjs"
+  }
+}
