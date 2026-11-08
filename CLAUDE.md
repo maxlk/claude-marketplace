@@ -11,7 +11,7 @@ claude plugin validate plugins/backlog-md
 claude --plugin-dir plugins/backlog-md   # try local changes for one session
 ```
 
-The e2e tests need the real CLI (`npm i -g backlog.md`, 1.55.3+). The plugin's own `bin/backlog` wrapper doesn't count and is skipped when looking for it, so 28 of the 40 tests fail without the real one. To use a copy that isn't on `PATH`, set `BACKLOG_BIN_DIR=/dir/containing/backlog`.
+The e2e tests need the real CLI (`npm i -g backlog.md`, 1.55.3+). The plugin's own `bin/backlog` wrapper doesn't count and is skipped when looking for it, so 29 of the 42 tests fail without the real one. To use a copy that isn't on `PATH`, set `BACKLOG_BIN_DIR=/dir/containing/backlog`.
 
 Run one test: `node --test --test-name-pattern="<name>" tests/backlog-md/e2e.test.mjs`.
 

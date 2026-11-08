@@ -3,8 +3,19 @@ import assert from 'node:assert/strict';
 import { classifyCommand, scan } from '../../plugins/backlog-md/lib/scan.mjs';
 import { classify, createModel, editModel, parseCreate, parseEdit } from '../../plugins/backlog-md/lib/argv.mjs';
 import { evaluate, stagesFor } from '../../plugins/backlog-md/lib/policy.mjs';
-import { inferClasses, validateStatuses } from '../../plugins/backlog-md/lib/setup.mjs';
+import { inferClasses, suggestTaskPrefix, validateStatuses, validateTaskPrefix } from '../../plugins/backlog-md/lib/setup.mjs';
 import { parseConfig, taskFromFile } from '../../plugins/backlog-md/lib/board.mjs';
+
+test('task prefixes follow the CLI rules and suggestions are always usable', () => {
+  assert.equal(validateTaskPrefix('abc'), null);
+  for (const bad of ['', 'A1', 'my-proj', 'a b', 'doc', 'DRAFT', 'Decision']) assert.match(validateTaskPrefix(bad), /invalid_task_prefix/, bad);
+  assert.equal(suggestTaskPrefix('claude-marketplace'), 'CM');
+  assert.equal(suggestTaskPrefix('myCoolApp'), 'MCA');
+  assert.equal(suggestTaskPrefix('payments'), 'PAY');
+  assert.equal(suggestTaskPrefix('docs'), 'DOCS');
+  assert.equal(suggestTaskPrefix('task'), 'TAS');
+  assert.equal(suggestTaskPrefix('123'), 'PROJ');
+});
 
 test('scanner accepts simple and quoted commands', () => {
   assert.deepEqual(scan('backlog task list --plain').tokens, ['backlog', 'task', 'list', '--plain']);

@@ -1,7 +1,7 @@
 {
   "name": "backlog-md",
   "displayName": "Backlog.md for Claude Code",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Track work on a Backlog.md kanban board: guided per-project setup, dedicated-ref storage, required-field gates, board routing and sync. Unofficial.",
   "author": { "name": "maxlk", "url": "https://github.com/maxlk" },
   "homepage": "https://github.com/maxlk/claude-marketplace/tree/main/plugins/backlog-md",

@@ -17,7 +17,7 @@ Branch on the result:
 - The plugin offered an attach flow, or `backlogBranch` shows a remote or local `backlog` branch → dry-run `{"mode":"ref"}`. If it reports `attach: true`, a shared board exists: ask only about **Sync** and **Apply**. If it reports a `branch_collision`, continue normally.
 - Otherwise continue.
 
-`--defaults` skips questions: `ref` storage when in git (otherwise `folder`), `standard` columns, `agent-ready` fields, sync manual.
+`--defaults` skips questions: `ref` storage when in git (otherwise `folder`), `standard` columns, `agent-ready` fields, `TASK` IDs, sync manual.
 
 ## 2. Storage (always ask first, by itself)
 Ask "Where should this project's backlog live?":
@@ -32,11 +32,13 @@ Treat free-text "Other" as a request to map onto these modes. A board shared by 
 
 Mode values: `ref`, `folder`, `existing`, `in-tree`, `local`. Run `backlog-md setup --dry-run --spec '{"mode":"ref"}'` before going on.
 - `branch_collision` error: ask for another branch name (suggest `kanban` or `project-board`) and pass `"branch"`.
-- `attach: true`: this board already exists. Skip Columns. For a board with a policy, skip Fields as well.
+- `attach: true`: this board already exists. Skip Columns and the task ID prefix. For a board with a policy, skip Fields as well.
 - `existing` result includes `detected`. Show its statuses grouped as queued / active / terminal and ask: **Use this mapping (Recommended)** / **Adjust**. Pass adjusted values as `"classes"`. Never rewrite an existing board's columns here. If `detected.hasPolicy` is true, skip Fields.
 
-## 3. New board: columns and fields (one AskUserQuestion, two questions)
+## 3. New board: task prefix, columns and fields (one AskUserQuestion, three questions)
 Use `backlog-md presets` for the exact statuses, and put them in each option's description.
+
+**What prefix should task IDs use?** `detect.suggestedTaskPrefix` (Recommended) · `TASK` (Backlog.md's default). Show an example ID in each description, such as `CM-1`, and say the prefix can't be changed through this plugin later. "Other": a typed prefix, letters only, not `draft`, `doc` or `decision`. Pass the answer as `"taskPrefix"`, including when it is `TASK`.
 
 **Which kanban columns?** Standard (Recommended) · Review-gated · Agent-driven · More → follow-up: Minimal, Release / QA, Research. "Other": a typed list becomes `{"statuses":[...]}` with at least 2 unique names, no `Draft`, the last one terminal.
 
@@ -52,10 +54,10 @@ Ask, naming the actual remote from `detect.origin`: **Sync automatically (Recomm
 ## 5. Review and apply
 Run `backlog-md setup --dry-run --spec '<full spec>'` and show `actions` and `notes` as a short list. Tell the user that board commits skip repository git hooks and signing. Ask **Apply (Recommended)** / **Change something** / **Cancel**.
 
-On Apply: `backlog-md setup --spec '<full spec>'`. On `milestone_required` go back to the milestone question; report other `errors` plainly.
+On Apply: `backlog-md setup --spec '<full spec>'`. On `milestone_required` go back to the milestone question, and on `invalid_task_prefix` (also possible in the dry run) ask for the prefix again; report other `errors` plainly.
 
 ## 6. Finish
-Report mode, location, columns and required fields. Mention `/backlog-md:status`. For `ref`, `folder`, `local` or `existing` boards, the user's own terminal needs a helper because the plugin's routing only applies inside Claude: run `backlog-md shell-init` and show the line to add to their shell profile.
+Report mode, location, task ID prefix, columns and required fields. Mention `/backlog-md:status`. For `ref`, `folder`, `local` or `existing` boards, the user's own terminal needs a helper because the plugin's routing only applies inside Claude: run `backlog-md shell-init` and show the line to add to their shell profile.
 
 ## Reconfigure
 Ask (multi-select) what to change: **Columns**, **Required fields**, **Settings** (enforcement off/warn/block, sync, auto-approve writes/reads/off). Apply with `backlog-md reconfigure --spec '<json>'`, keys `columns`, `statusMap`, `classes`, `fields`, `enforcement`, `sync`, `autoApprove`, `milestones`.

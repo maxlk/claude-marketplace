@@ -5,7 +5,7 @@ import { BIN_DIR, exists, git, realpath, run, shellQuote } from './common.mjs';
 import { boardPaths, boardRoot, cliVersion, findBacklogDir, findRealCli, isConfigured, loadPolicy, readRuntime, resolveContext, saveState, versionOk, MIN } from './context-exports.mjs';
 import { allCallbacks, hashCallback, listTasks, loadMilestones, readConfig, viewTask } from './board.mjs';
 import { classOf, evaluate, stagesFor, summarizePolicy } from './policy.mjs';
-import { applySetup, COLUMN_PRESETS, dryRun, FIELD_PRESETS, heal, reconfigure } from './setup.mjs';
+import { applySetup, COLUMN_PRESETS, dryRun, FIELD_PRESETS, heal, reconfigure, suggestTaskPrefix } from './setup.mjs';
 import { commitBoard, pull, push, syncStatus, unblock } from './sync.mjs';
 
 const [, , command, ...args] = process.argv;
@@ -37,6 +37,7 @@ function detect() {
     git: ctx.git,
     bare: ctx.git && !ctx.topLevel,
     projectDir: ctx.projectDir,
+    suggestedTaskPrefix: suggestTaskPrefix(path.basename(ctx.projectDir ?? ctx.cwd)),
     configured: isConfigured(ctx),
     state: ctx.state,
     cli: { path: real, version, ok: versionOk(version), minimum: MIN, shimFirst: onPath ? realpath(path.dirname(onPath)) === realpath(BIN_DIR) : false },

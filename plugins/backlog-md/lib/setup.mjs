@@ -36,6 +36,25 @@ export function validateStatuses(statuses) {
   return errors;
 }
 
+// Mirrors the rules `backlog init --task-prefix` enforces, so a bad prefix fails
+// in the dry run rather than halfway through creating the board.
+const RESERVED_PREFIXES = ['draft', 'doc', 'decision'];
+
+export function validateTaskPrefix(prefix) {
+  if (!/^[A-Za-z]+$/.test(String(prefix))) return `invalid_task_prefix: "${prefix}" must contain only letters (a-z).`;
+  if (RESERVED_PREFIXES.includes(String(prefix).toLowerCase())) return `invalid_task_prefix: "${prefix}" is reserved by Backlog.md. Choose another prefix.`;
+  return null;
+}
+
+// Initials for multi-word names (claude-marketplace → CM), otherwise the first letters.
+export function suggestTaskPrefix(name) {
+  const words = String(name).split(/[^A-Za-z]+|(?<=[a-z])(?=[A-Z])/).filter(Boolean);
+  const joined = words.join('');
+  const candidates = [words.length > 1 ? words.map((w) => w[0]).join('').slice(0, 4) : '', joined.slice(0, 3), joined.slice(0, 4)];
+  const usable = candidates.find((c) => c.length >= 2 && c.toLowerCase() !== 'task' && !validateTaskPrefix(c));
+  return (usable ?? 'PROJ').toUpperCase();
+}
+
 export function resolveColumns(columns) {
   if (typeof columns === 'string') {
     const preset = COLUMN_PRESETS()[columns];
@@ -195,6 +214,9 @@ export function dryRun(spec, cwd = process.cwd()) {
   if (!p.errors.length && !p.attach) {
     const columns = resolveColumns(spec.columns ?? 'standard');
     const fields = resolveFields(spec.fields ?? 'agent-ready');
+    const prefixError = spec.taskPrefix == null ? null : validateTaskPrefix(spec.taskPrefix);
+    if (prefixError) p.errors.push(prefixError);
+    p.actions.push(`Task IDs: ${String(spec.taskPrefix ?? 'task').toUpperCase()}-1, ${String(spec.taskPrefix ?? 'task').toUpperCase()}-2, ...`);
     p.actions.push(`Columns: ${columns.statuses.join(' → ')}`);
     p.actions.push(`Required fields preset: ${fields.label ?? fields.id}`);
     if (fields.dod?.length) p.actions.push(`Definition of Done defaults: ${fields.dod.join('; ')}`);

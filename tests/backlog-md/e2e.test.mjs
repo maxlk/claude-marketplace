@@ -80,6 +80,23 @@ test('every storage mode initializes and is routed to', () => {
   assert.match(backlog(sb, nonGit, 'task', 'create', 'Works').out, /TASK-1/);
 });
 
+test('a chosen task prefix drives IDs and gates; a bad one creates nothing', () => {
+  const sb = sandbox();
+  const repo = gitRepo(sb);
+  assert.match(JSON.parse(admin(sb, repo, ['detect']).out).suggestedTaskPrefix, /^[A-Z]+$/);
+  for (const bad of ['A1', 'doc', '']) assert.match(setup(sb, repo, { mode: 'ref', taskPrefix: bad }).all, /invalid_task_prefix/, bad);
+  assert.notEqual(git(sb, repo, 'rev-parse', '--verify', '-q', 'refs/heads/backlog').code, 0, 'rejected prefix leaves no branch');
+
+  assert.equal(setup(sb, repo, { mode: 'ref', taskPrefix: 'abc' }).json.ok, true);
+  assert.match(backlog(sb, repo, 'task', 'create', 'First', '-d', 'x', '--ac', 'y').out, /Created task ABC-1/);
+  const early = backlog(sb, repo, 'task', 'edit', 'ABC-1', '-s', 'Done');
+  assert.equal(early.code, 1);
+  assert.match(early.err, /NOT applied/);
+  const r = backlog(sb, repo, 'task', 'edit', '1', '--status=done', '--check-ac', '1', '--check-dod', '1', '--check-dod', '2', '--check-dod', '3', '--final-summary', 'finished', '--plan', 'p', '-a', '@me');
+  assert.equal(r.code, 0, r.all);
+  assert.equal(view(sb, repo, 'ABC-1').status, 'Done');
+});
+
 test('branch collisions are reported, not clobbered', () => {
   const sb = sandbox();
   const repo = gitRepo(sb);
